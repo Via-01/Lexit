@@ -1,0 +1,15 @@
+pyproject.toml
+src/lexis/__init__.py
+src/lexis/cleaners.py
+src/lexis/extractors.py
+src/lexis/processor.py
+src/lexis/tokenizer.py
+src/lexis_text.egg-info/PKG-INFO
+src/lexis_text.egg-info/SOURCES.txt
+src/lexis_text.egg-info/dependency_links.txt
+src/lexis_text.egg-info/requires.txt
+src/lexis_text.egg-info/top_level.txt
+tests/test_cleaner.py
+tests/test_extractors.py
+tests/test_processor.py
+tests/test_tokenizer.py
