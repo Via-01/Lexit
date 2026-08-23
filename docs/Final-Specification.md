@@ -49,13 +49,13 @@ There is only **one Lexis v1 behavior/pipeline**. The package should not become 
 
 # 3. Public Input
 
-The primary public function is conceptually:
+The primary public function is:
 
 ```python
-process_text(text)
+process_text(text: str, tokenization: str = "word") -> dict
 ```
 
-The function accepts:
+`text` accepts:
 
 ```python
 str
@@ -63,9 +63,17 @@ str
 
 Only strings are valid inputs.
 
+`tokenization` accepts one of:
+
+```python
+"word"       # default
+"sentence"
+"character"
+```
+
 ## Invalid input
 
-If the input is not a string, Lexis raises:
+If `text` is not a string, Lexis raises:
 
 ```python
 TypeError
@@ -82,6 +90,22 @@ process_text(123)
 should raise `TypeError` rather than silently processing `"123"`.
 
 This prevents accidental misuse and hidden bugs in ML pipelines.
+
+## Invalid tokenization value
+
+If `tokenization` is not one of `"word"`, `"sentence"`, or `"character"`, Lexis raises:
+
+```python
+ValueError
+```
+
+For example:
+
+```python
+process_text("hello world", tokenization="paragraph")
+```
+
+should raise `ValueError` rather than silently falling back to a default.
 
 ---
 
@@ -120,32 +144,38 @@ Raw input
     ↓
 1. Input validation
     ↓
-2. Unicode normalization
+2. Extract URLs
     ↓
-3. Extract URLs
+3. Extract email addresses
     ↓
-4. Extract email addresses
+4. Unicode normalization
     ↓
-5. Remove HTML
+5. Remove extracted URLs and emails
     ↓
-6. Remove extracted URLs and emails
+6. Remove HTML
     ↓
-7. Normalize whitespace
+7. Remove emojis/decorative symbols
     ↓
-8. Convert text to lowercase
+8. Meaning-aware punctuation handling
     ↓
-9. Remove/normalize punctuation and decorative symbols
+9. Convert text to lowercase
     ↓
-10. Tokenize
+10. Normalize whitespace
     ↓
-11. Generate metadata
+11. Tokenize
     ↓
-12. Return dictionary
+12. Generate metadata
+    ↓
+13. Return dictionary
 ```
 
 The order is intentional.
 
-URLs and emails are extracted **before** cleaning so that they are preserved in the output rather than destroyed by subsequent preprocessing.
+URLs and emails are extracted **before** cleaning so that they are preserved in the output rather than destroyed by subsequent preprocessing. Extraction runs directly against the raw input; it does not depend on prior Unicode normalization.
+
+Whitespace normalization runs **last**, immediately before tokenization. Earlier steps (HTML removal, extraction removal) intentionally leave gaps behind — collapsing whitespace only once, at the end, keeps that cleanup logic in a single place rather than repeating it after every step.
+
+Symbol removal (emoji/decorative characters) runs **before** punctuation handling, and both run **before** lowercasing, so that a token's alphanumeric shape is still intact when Lexis decides which punctuation is structurally meaningful.
 
 ---
 
@@ -191,6 +221,8 @@ Lexis provides one consistent default behavior rather than exposing a large conf
 
 URLs are extracted from the original input before destructive cleaning.
 
+A URL is recognized if it begins with `http://`, `https://`, or `www.`. A bare domain with no scheme and no `www.` prefix (e.g. `example.com`) is not treated as a URL.
+
 Extracted URLs are returned separately in:
 
 ```python
@@ -210,6 +242,38 @@ produces approximately:
     "https://example.com"
 ]
 ```
+
+`www.`-prefixed addresses are extracted the same way:
+
+```text
+"See www.example.org for details."
+```
+
+produces:
+
+```python
+"urls": [
+    "www.example.org"
+]
+```
+
+## Trailing punctuation
+
+Sentence or phrase punctuation immediately following a URL (`.`, `,`, `!`, `?`, `;`, `:`) is not considered part of the URL and is stripped from the extracted value:
+
+```text
+"Visit https://example.com."
+```
+
+produces:
+
+```python
+"urls": [
+    "https://example.com"
+]
+```
+
+not `"https://example.com."`.
 
 The extracted URL is then removed from the text being cleaned.
 
@@ -397,6 +461,17 @@ remains:
 don't
 ```
 
+## Trailing punctuation on technical tokens
+
+A token can simultaneously contain meaningful internal punctuation *and* trailing punctuation that is purely a sentence/phrase separator. Only the separator is removed; the internal punctuation is preserved.
+
+```text
+Node.js.   → node.js
+C++.       → c++
+```
+
+Note that in `Node.js.` the first `.` is structurally part of the token and the second `.` is sentence punctuation, even though both characters are the same symbol. Lexis distinguishes them by position — punctuation embedded between two alphanumeric characters is preserved, while punctuation at the true edge of a token (nothing meaningful before or after it in context) is removed — rather than by classifying the whole token as "technical" or "not technical" and protecting every matching character in it.
+
 The implementation should use a Unicode-aware/general tokenization strategy rather than maintaining an unnecessarily large hand-written punctuation exception list.
 
 ---
@@ -450,6 +525,14 @@ The distinction is:
 * Meaningful internal punctuation → preserve
 * Numbers → preserve
 * Emojis/decorative symbols → remove
+
+Some characters, such as `+`, are classified as Unicode symbols but are also structurally meaningful within a technical token (e.g. `C++`). In that case the symbol is preserved rather than removed:
+
+```text
+"C++ is fast 🚀" → "c++ is fast"
+```
+
+The `+` characters in `C++` are kept; the rocket emoji is removed.
 
 ---
 
@@ -573,6 +656,25 @@ becomes:
 Sentence punctuation itself is not included in the returned sentence tokens.
 
 Commas, semicolons, colons, etc. do not create sentence boundaries.
+
+## Boundary characters inside technical tokens
+
+A boundary character is only treated as a sentence boundary when it is *not* sandwiched between two alphanumeric characters. A `.`, `?`, or `!` embedded inside a technical or compound token (e.g. `Node.js`, `3.14`) is part of that token, not a sentence break — consistent with how the same characters are treated everywhere else in the pipeline (see §12).
+
+```text
+"Use Node.js for this. It works with C++ too!"
+```
+
+becomes:
+
+```python
+[
+    "use node.js for this",
+    "it works with c++ too"
+]
+```
+
+`Node.js` is not split into `"node"` and `"js"` as separate sentences. A boundary character at the true edge of a sentence — including one immediately after a technical token, such as `Node.js.` — still ends the sentence normally.
 
 ---
 
@@ -782,33 +884,33 @@ Raw text
 Input validation
    │
    ▼
-Unicode normalization
-   │
-   ▼
 Extract URLs ────────────────┐
    │                         │
    ▼                         │
-Extract emails ─────────────┤
+Extract emails ──────────────┤
    │                         │
    ▼                         │
-Remove HTML                 │
+Unicode normalization        │
    │                         │
    ▼                         │
-Remove extracted URLs/emails│
+Remove extracted URLs/emails │
    │                         │
    ▼                         │
-Normalize whitespace         │
+Remove HTML                  │
+   │                         │
+   ▼                         │
+Remove emojis/decorative     │
+symbols                      │
+   │                         │
+   ▼                         │
+Meaning-aware punctuation    │
+handling                     │
    │                         │
    ▼                         │
 Lowercase                    │
    │                         │
    ▼                         │
-Meaning-aware punctuation   │
-handling                     │
-   │                         │
-   ▼                         │
-Remove emojis/decorative     │
-symbols                      │
+Normalize whitespace         │
    │                         │
    ▼                         │
 Tokenization                 │
@@ -862,3 +964,15 @@ Once implementation begins:
 * Do not introduce task-specific NLP behavior.
 
 Any future functionality should be considered for a separate version rather than changing the agreed v1 behavior mid-implementation.
+
+---
+
+# 25. Errata
+
+This section tracks corrections made to this document so that it accurately describes the shipped v1 implementation. These are documentation fixes, not behavior changes — the freeze in §24 still applies to the underlying pipeline stages, return structure, and scope.
+
+* **Pipeline order (§5, §23).** The original draft listed whitespace normalization before lowercasing and punctuation handling, and listed extraction as occurring after Unicode normalization. The implemented order extracts URLs/emails from the raw input first, then normalizes, cleans, and normalizes whitespace last, immediately before tokenization. §5 and §23 have been corrected to match the implementation.
+* **Sentence tokenization and technical tokens (§17).** The original draft did not account for boundary characters embedded inside a technical token (e.g. the `.` in `Node.js`). A boundary character is only a sentence boundary when it is not sandwiched between two alphanumeric characters, consistent with the meaning-preserving punctuation rule already defined in §12.
+* **URL extraction (§8).** Documented two behaviors that were already implemented but not written down: `www.`-prefixed addresses are recognized as URLs, and trailing sentence/phrase punctuation immediately after a URL is stripped from the extracted value.
+* **Technical-token symbol preservation (§14).** Documented that a character which is simultaneously a Unicode symbol and part of a technical token's meaningful punctuation (e.g. `+` in `C++`) is preserved rather than stripped during emoji/decorative-symbol removal.
+* **Public function signature (§3).** Documented the `tokenization` parameter and the `ValueError` raised for an unsupported value, both of which were already implemented but missing from the original signature description.

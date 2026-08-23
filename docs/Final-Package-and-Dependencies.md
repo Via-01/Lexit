@@ -28,6 +28,12 @@ lexis/
     └── test_processor.py
 ```
 
+Note the test-file naming is intentionally singular where the module it covers is plural (`tests/test_cleaner.py` tests `src/lexis/cleaners.py`); this is existing convention, not a typo.
+
+Generated artifacts — `__pycache__/`, `*.egg-info/`, `.pytest_cache/` — are build/tooling output, not part of the source layout above, and should not be tracked in version control. If the project doesn't already have a `.gitignore` covering these, add one.
+
+> **Note:** `README.md` and `LICENSE` are listed above as part of the intended structure but are not yet present in the repository. A README has been added alongside this documentation pass; a `LICENSE` file still needs to be chosen and added separately, since `pyproject.toml` already declares `license = { file = "LICENSE" }`.
+
 ## 2. Module Responsibilities
 
 ### `processor.py`
@@ -62,7 +68,7 @@ Extracted URLs and emails are returned in the final result dictionary.
 
 ---
 
-### `cleaner.py`
+### `cleaners.py`
 
 Contains the actual text-cleaning operations.
 
@@ -71,10 +77,10 @@ Responsibilities:
 * Unicode normalization
 * HTML tag removal
 * URL/email removal from processing text
-* Whitespace normalization
-* Lowercase conversion
-* Meaning-aware punctuation handling
 * Emoji/decorative-symbol removal
+* Meaning-aware punctuation handling
+* Lowercase conversion
+* Whitespace normalization
 
 The cleaner should not perform tokenization.
 
