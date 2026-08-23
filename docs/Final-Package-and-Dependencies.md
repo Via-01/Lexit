@@ -17,7 +17,7 @@ lexis/
 │   └── lexis/
 │       ├── __init__.py
 │       ├── processor.py
-│       ├── cleaner.py
+│       ├── cleaners.py
 │       ├── extractors.py
 │       └── tokenizer.py
 │
