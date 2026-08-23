@@ -32,7 +32,7 @@ Note the test-file naming is intentionally singular where the module it covers i
 
 Generated artifacts — `__pycache__/`, `*.egg-info/`, `.pytest_cache/` — are build/tooling output, not part of the source layout above, and should not be tracked in version control. If the project doesn't already have a `.gitignore` covering these, add one.
 
-> **Note:** `README.md` and `LICENSE` are listed above as part of the intended structure but are not yet present in the repository. A README has been added alongside this documentation pass; a `LICENSE` file still needs to be chosen and added separately, since `pyproject.toml` already declares `license = { file = "LICENSE" }`.
+> **Note:** `README.md` and `LICENSE` are now both present, matching the structure above. The project is licensed under MIT.
 
 ## 2. Module Responsibilities
 
