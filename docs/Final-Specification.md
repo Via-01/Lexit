@@ -1,26 +1,26 @@
-# Lexis v1 — Final Behavioral Specification
+# Lexit v1 — Final Behavioral Specification
 
 ## 1. Overview
 
-**Lexis** is a lightweight, reusable, language- and model-agnostic Python text preprocessing package.
+**Lexit** is a lightweight, reusable, language- and model-agnostic Python text preprocessing package.
 
 Its purpose is to handle the common, repetitive text-cleaning and tokenization work that is typically required before text is passed into an NLP or machine-learning pipeline.
 
-Lexis is intentionally **simple, robust, and focused**.
+Lexit is intentionally **simple, robust, and focused**.
 
 It does **not** attempt to replace NLP frameworks or provide downstream NLP/ML functionality.
 
 ### Core principle
 
-> **Lexis prepares text. The downstream application decides what to do with it.**
+> **Lexit prepares text. The downstream application decides what to do with it.**
 
-Lexis therefore does not perform vectorization, embeddings, model training, sentiment analysis, or other task-specific processing.
+Lexit therefore does not perform vectorization, embeddings, model training, sentiment analysis, or other task-specific processing.
 
 ---
 
 # 2. Scope
 
-Lexis v1 provides:
+Lexit v1 provides:
 
 * Text validation
 * Unicode normalization
@@ -37,13 +37,13 @@ Lexis v1 provides:
 * Basic processing metadata
 * A consistent dictionary-based return format
 
-Lexis supports three tokenization modes:
+Lexit supports three tokenization modes:
 
 1. `word` — default
 2. `sentence`
 3. `character`
 
-There is only **one Lexis v1 behavior/pipeline**. The package should not become a collection of radically different preprocessing modes.
+There is only **one Lexit v1 behavior/pipeline**. The package should not become a collection of radically different preprocessing modes.
 
 ---
 
@@ -73,13 +73,13 @@ Only strings are valid inputs.
 
 ## Invalid input
 
-If `text` is not a string, Lexis raises:
+If `text` is not a string, Lexit raises:
 
 ```python
 TypeError
 ```
 
-Lexis should **not silently convert arbitrary objects using `str()`**.
+Lexit should **not silently convert arbitrary objects using `str()`**.
 
 For example:
 
@@ -93,7 +93,7 @@ This prevents accidental misuse and hidden bugs in ML pipelines.
 
 ## Invalid tokenization value
 
-If `tokenization` is not one of `"word"`, `"sentence"`, or `"character"`, Lexis raises:
+If `tokenization` is not one of `"word"`, `"sentence"`, or `"character"`, Lexit raises:
 
 ```python
 ValueError
@@ -131,13 +131,13 @@ For example, if the input contains only removable content:
 "!!! 😀 @@@"
 ```
 
-Lexis should return an empty processing result rather than raising an error.
+Lexit should return an empty processing result rather than raising an error.
 
 ---
 
 # 5. Processing Pipeline
 
-The finalized Lexis v1 pipeline is:
+The finalized Lexit v1 pipeline is:
 
 ```text
 Raw input
@@ -175,17 +175,17 @@ URLs and emails are extracted **before** cleaning so that they are preserved in 
 
 Whitespace normalization runs **last**, immediately before tokenization. Earlier steps (HTML removal, extraction removal) intentionally leave gaps behind — collapsing whitespace only once, at the end, keeps that cleanup logic in a single place rather than repeating it after every step.
 
-Symbol removal (emoji/decorative characters) runs **before** punctuation handling, and both run **before** lowercasing, so that a token's alphanumeric shape is still intact when Lexis decides which punctuation is structurally meaningful.
+Symbol removal (emoji/decorative characters) runs **before** punctuation handling, and both run **before** lowercasing, so that a token's alphanumeric shape is still intact when Lexit decides which punctuation is structurally meaningful.
 
 ---
 
 # 6. Unicode Normalization
 
-Lexis performs **Unicode normalization**.
+Lexit performs **Unicode normalization**.
 
 The purpose is to normalize equivalent Unicode representations without converting the text into ASCII.
 
-Lexis should **not** transliterate arbitrary Unicode text into English/ASCII.
+Lexit should **not** transliterate arbitrary Unicode text into English/ASCII.
 
 For example, Unicode normalization should not turn an entire multilingual text into an ASCII approximation.
 
@@ -213,7 +213,7 @@ becomes:
 
 This is intentionally not configurable in v1.
 
-Lexis provides one consistent default behavior rather than exposing a large configuration surface.
+Lexit provides one consistent default behavior rather than exposing a large configuration surface.
 
 ---
 
@@ -335,7 +335,7 @@ HTML tags themselves should not remain in the cleaned text.
 
 # 11. Whitespace Normalization
 
-Lexis normalizes unnecessary whitespace.
+Lexit normalizes unnecessary whitespace.
 
 This includes:
 
@@ -348,13 +348,13 @@ This includes:
 For example:
 
 ```text
-"  Hello    world\n\nthis is\tLexis  "
+"  Hello    world\n\nthis is\tLexit  "
 ```
 
 becomes:
 
 ```text
-"Hello world this is Lexis"
+"Hello world this is Lexit"
 ```
 
 Whitespace normalization occurs before the final output is generated.
@@ -369,7 +369,7 @@ Punctuation handling follows a **meaning-preserving general NLP rule**.
 
 > Remove punctuation when it functions as surrounding or separating punctuation; preserve punctuation when it is structurally part of a meaningful token.
 
-Lexis should therefore avoid blindly deleting every punctuation character.
+Lexit should therefore avoid blindly deleting every punctuation character.
 
 ## Punctuation that should normally be removed
 
@@ -470,7 +470,7 @@ Node.js.   → node.js
 C++.       → c++
 ```
 
-Note that in `Node.js.` the first `.` is structurally part of the token and the second `.` is sentence punctuation, even though both characters are the same symbol. Lexis distinguishes them by position — punctuation embedded between two alphanumeric characters is preserved, while punctuation at the true edge of a token (nothing meaningful before or after it in context) is removed — rather than by classifying the whole token as "technical" or "not technical" and protecting every matching character in it.
+Note that in `Node.js.` the first `.` is structurally part of the token and the second `.` is sentence punctuation, even though both characters are the same symbol. Lexit distinguishes them by position — punctuation embedded between two alphanumeric characters is preserved, while punctuation at the true edge of a token (nothing meaningful before or after it in context) is removed — rather than by classifying the whole token as "technical" or "not technical" and protecting every matching character in it.
 
 The implementation should use a Unicode-aware/general tokenization strategy rather than maintaining an unnecessarily large hand-written punctuation exception list.
 
@@ -495,7 +495,7 @@ remain represented in the processed text.
 
 The rationale is that numerical information can be important to downstream NLP/ML tasks.
 
-Lexis should therefore not assume that numbers are noise.
+Lexit should therefore not assume that numbers are noise.
 
 ---
 
@@ -503,7 +503,7 @@ Lexis should therefore not assume that numbers are noise.
 
 Emojis are treated separately from punctuation.
 
-Lexis removes emojis and decorative/non-linguistic symbols from the cleaned text.
+Lexit removes emojis and decorative/non-linguistic symbols from the cleaned text.
 
 Example:
 
@@ -538,7 +538,7 @@ The `+` characters in `C++` are kept; the rocket emoji is removed.
 
 # 15. Tokenization
 
-Lexis supports exactly three tokenization strategies.
+Lexit supports exactly three tokenization strategies.
 
 ```text
 word
@@ -625,6 +625,18 @@ remains a token rather than being arbitrarily split into:
 ["covid", "19"]
 ```
 
+## Scripts without inter-word spacing
+
+Because word tokenization relies on whitespace, it does not correctly segment languages that do not place spaces between words — notably Chinese, Japanese, Thai, Lao, Khmer, and Myanmar. For such text, a full sentence or clause is returned as a single token rather than being split into its constituent words.
+
+This is a stated scope boundary, not a defect: correct word segmentation for these languages requires dictionary- or model-based segmentation (e.g. `jieba`, `MeCab`/`fugashi`, `pythainlp`), which is out of scope for Lexit. Other pipeline stages — Unicode normalization, HTML removal, URL/email extraction, punctuation and symbol handling — operate correctly on these languages regardless; it is specifically word-boundary detection that is affected.
+
+Sentence tokenization (§17) does not help as a fallback here either: it recognizes only the ASCII characters `.`, `!`, `?` as boundaries, while Chinese and Japanese sentence-ending punctuation (`。`, `！`, `？`) are distinct, full-width Unicode characters that are never matched. In practice, both word and sentence tokenization return the entire input as a single unsplit token for these languages.
+
+Character tokenization (§18) does not have the word-boundary problem, since it splits every character regardless of spacing. It does, however, inherit a related punctuation artifact: punctuation-stripping (§12) only trims from the edges of a whitespace-delimited token, and since an entire unspaced sentence is treated as a single token, punctuation embedded in the middle of it is never stripped. Character tokenization then splits that punctuation out as its own tokens alongside the individual characters — e.g. `，`, `！`, and `。` appear as standalone tokens rather than being removed, unlike in space-delimited languages where the same punctuation is correctly stripped before character tokenization occurs.
+
+Languages that use inter-word spacing — including Latin-, Cyrillic-, Greek-, Arabic-, Hebrew-, and Indic-script languages, as well as Korean — are unaffected by this limitation.
+
 ---
 
 # 17. Sentence Tokenization
@@ -640,15 +652,15 @@ No additional punctuation is treated as a sentence boundary in v1.
 For example:
 
 ```text
-"Lexis is simple. Lexis is useful! Is it reusable?"
+"Lexit is simple. Lexit is useful! Is it reusable?"
 ```
 
 becomes:
 
 ```python
 [
-    "lexis is simple",
-    "lexis is useful",
+    "lexit is simple",
+    "lexit is useful",
     "is it reusable"
 ]
 ```
@@ -710,7 +722,7 @@ becomes:
 
 This keeps character tokenization literal and predictable.
 
-Lexis does not introduce another hidden whitespace-removal step specifically for character tokenization.
+Lexit does not introduce another hidden whitespace-removal step specifically for character tokenization.
 
 ---
 
@@ -735,7 +747,7 @@ Every successful call returns the same dictionary structure regardless of tokeni
 
 ## `original_text`
 
-The exact text supplied to Lexis.
+The exact text supplied to Lexit.
 
 No modification is made to this field.
 
@@ -785,7 +797,7 @@ Number of tokens returned in `tokens`.
 
 # 20. Empty Result
 
-If valid input is empty or becomes empty after preprocessing, Lexis still returns the same dictionary structure.
+If valid input is empty or becomes empty after preprocessing, Lexit still returns the same dictionary structure.
 
 Conceptually:
 
@@ -804,13 +816,13 @@ Conceptually:
 }
 ```
 
-Lexis does not raise an exception merely because no usable text remains.
+Lexit does not raise an exception merely because no usable text remains.
 
 ---
 
-# 21. What Lexis Does NOT Provide
+# 21. What Lexit Does NOT Provide
 
-Lexis v1 deliberately excludes functionality that belongs to downstream NLP/ML tooling.
+Lexit v1 deliberately excludes functionality that belongs to downstream NLP/ML tooling.
 
 It does not provide:
 
@@ -830,13 +842,13 @@ It does not provide:
 * Large configurable preprocessing frameworks
 * API/server functionality
 
-The consumer can take Lexis's output and use any of these tools afterward.
+The consumer can take Lexit's output and use any of these tools afterward.
 
 ---
 
 # 22. Design Philosophy
 
-Lexis should remain:
+Lexit should remain:
 
 ### Simple
 
@@ -852,7 +864,7 @@ The same package should work as a preprocessing step across many different NLP/M
 
 ### Agnostic
 
-Lexis should not assume whether the downstream task is:
+Lexit should not assume whether the downstream task is:
 
 * classification
 * regression
@@ -869,11 +881,11 @@ The same input and configuration should produce deterministic, understandable ou
 
 ### Lightweight
 
-Lexis should not unnecessarily recreate functionality already provided by established NLP libraries.
+Lexit should not unnecessarily recreate functionality already provided by established NLP libraries.
 
 ---
 
-# 23. Final Lexis v1 Pipeline
+# 23. Final Lexit v1 Pipeline
 
 The implementation must follow this finalized pipeline:
 
@@ -951,7 +963,7 @@ character
 
 # 24. Implementation Freeze
 
-This specification represents the **Lexis v1 behavioral contract**.
+This specification represents the **Lexit v1 behavioral contract**.
 
 Once implementation begins:
 

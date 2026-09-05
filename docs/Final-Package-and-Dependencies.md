@@ -1,11 +1,11 @@
-# Lexis v1 — Package Structure and Dependencies
+# Lexit v1 — Package Structure and Dependencies
 
 ## 1. Project Structure
 
-Lexis uses a standard `src`-based Python package layout.
+Lexit uses a standard `src`-based Python package layout.
 
 ```text
-lexis/
+lexit/
 ├── docs/
 │     ├── Final-Specification.md
 │     └── Final-Package-and-Dependencies.md
@@ -14,7 +14,7 @@ lexis/
 ├── README.md
 ├── LICENSE
 ├── src/
-│   └── lexis/
+│   └── lexit/
 │       ├── __init__.py
 │       ├── processor.py
 │       ├── cleaners.py
@@ -28,7 +28,7 @@ lexis/
     └── test_processor.py
 ```
 
-Note the test-file naming is intentionally singular where the module it covers is plural (`tests/test_cleaner.py` tests `src/lexis/cleaners.py`); this is existing convention, not a typo.
+Note the test-file naming is intentionally singular where the module it covers is plural (`tests/test_cleaner.py` tests `src/lexit/cleaners.py`); this is existing convention, not a typo.
 
 Generated artifacts — `__pycache__/`, `*.egg-info/`, `.pytest_cache/` — are build/tooling output, not part of the source layout above, and should not be tracked in version control. If the project doesn't already have a `.gitignore` covering these, add one.
 
@@ -40,7 +40,7 @@ Generated artifacts — `__pycache__/`, `*.egg-info/`, `.pytest_cache/` — are 
 
 The main orchestration layer.
 
-Responsible for coordinating the complete Lexis pipeline:
+Responsible for coordinating the complete Lexit pipeline:
 
 ```text
 input validation
@@ -106,7 +106,7 @@ The tokenizer operates on the already-cleaned text.
 
 Defines the public package interface.
 
-Users should be able to import the primary Lexis functionality directly from the package rather than needing to know the internal module structure.
+Users should be able to import the primary Lexit functionality directly from the package rather than needing to know the internal module structure.
 
 The internal modules should therefore remain implementation details.
 
@@ -114,7 +114,7 @@ The internal modules should therefore remain implementation details.
 
 ## 3. Runtime Dependencies
 
-Lexis intentionally keeps its runtime dependency footprint extremely small.
+Lexit intentionally keeps its runtime dependency footprint extremely small.
 
 ### External dependency
 
@@ -124,7 +124,7 @@ regex
 
 `regex` is used for robust Unicode-aware pattern matching and text classification.
 
-This is justified because Lexis needs reliable handling of:
+This is justified because Lexit needs reliable handling of:
 
 * Unicode text
 * Unicode character categories
@@ -135,7 +135,7 @@ This is justified because Lexis needs reliable handling of:
 * symbols
 * multilingual text
 
-Lexis does not attempt to recreate sophisticated Unicode-aware regular-expression functionality solely to achieve zero dependencies.
+Lexit does not attempt to recreate sophisticated Unicode-aware regular-expression functionality solely to achieve zero dependencies.
 
 ### Python standard library
 
@@ -178,7 +178,7 @@ Used for static type checking.
 
 ## 5. Explicitly Excluded Dependencies
 
-Lexis v1 does **not** depend on:
+Lexit v1 does **not** depend on:
 
 * spaCy
 * NLTK
@@ -192,7 +192,7 @@ Lexis v1 does **not** depend on:
 * embedding libraries
 * vectorization libraries
 
-Lexis is a preprocessing utility, not a complete NLP framework.
+Lexit is a preprocessing utility, not a complete NLP framework.
 
 ---
 
@@ -204,7 +204,7 @@ Target Python version:
 Python >= 3.10
 ```
 
-Lexis does not require newer Python-specific functionality, so unnecessarily restricting the supported Python versions would reduce reusability.
+Lexit does not require newer Python-specific functionality, so unnecessarily restricting the supported Python versions would reduce reusability.
 
 ---
 
@@ -230,7 +230,7 @@ Nothing more unless a genuine implementation requirement is discovered.
 
 ## 8. Architectural Constraints
 
-The following are fixed for Lexis v1:
+The following are fixed for Lexit v1:
 
 * Use a `src` package layout.
 * Keep internal responsibilities separated.
