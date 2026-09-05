@@ -1,5 +1,5 @@
 # tokenizer.py
-"""Tokenization utilities for Lexis."""
+"""Tokenization utilities for Lexit."""
 
 import regex
 

@@ -1,5 +1,5 @@
 # cleaners.py
-"""Text cleaning utilities for Lexis."""
+"""Text cleaning utilities for Lexit."""
 
 import unicodedata
 
@@ -216,7 +216,7 @@ def clean_text(
     preserve_sentence_boundaries: bool = False,
 ) -> str:
     """
-    Run the complete Lexis text-cleaning pipeline.
+    Run the complete Lexit text-cleaning pipeline.
 
     The preserve_sentence_boundaries option is an internal mechanism
     used when sentence tokenization needs '.', '?' and '!' to remain

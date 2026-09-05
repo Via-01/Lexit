@@ -1,5 +1,5 @@
 # __init__.py
-"""Lexis: lightweight text preprocessing and tokenization."""
+"""Lexit: lightweight text preprocessing and tokenization."""
 
 from .processor import process_text
 

@@ -1,4 +1,4 @@
-"""Main text-processing pipeline for Lexis."""
+"""Main text-processing pipeline for Lexit."""
 
 from typing import Any
 
@@ -14,7 +14,7 @@ def process_text(
     tokenization: str = "word",
 ) -> dict[str, Any]:
     """
-    Process text through the complete Lexis pipeline.
+    Process text through the complete Lexit pipeline.
 
     Args:
         text: Input text to process.
