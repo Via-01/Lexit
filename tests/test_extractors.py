@@ -1,7 +1,7 @@
 # test_extractors.py
-"""Tests for Lexis URL and email extraction."""
+"""Tests for Lexit URL and email extraction."""
 
-from lexis.extractors import extract_emails, extract_urls
+from lexit.extractors import extract_emails, extract_urls
 
 
 def test_extract_http_url() -> None:

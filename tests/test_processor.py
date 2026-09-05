@@ -1,9 +1,9 @@
 # test_processor.py
-"""Integration tests for the Lexis processing pipeline."""
+"""Integration tests for the Lexit processing pipeline."""
 
 import pytest
 
-from lexis import process_text
+from lexit import process_text
 
 
 def test_process_text_defaults_to_word_tokenization() -> None:

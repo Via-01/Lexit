@@ -1,7 +1,7 @@
 # test_cleaner.py
-"""Tests for Lexis text cleaning."""
+"""Tests for Lexit text cleaning."""
 
-from lexis.cleaners import (
+from lexit.cleaners import (
     clean_punctuation,
     clean_text,
     lowercase,

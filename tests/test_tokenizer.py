@@ -1,9 +1,8 @@
-# test_tokenizer.py
-"""Tests for Lexis tokenization."""
+"""Tests for Lexit tokenization."""
 
 import pytest
 
-from lexis.tokenizer import (
+from lexit.tokenizer import (
     tokenize,
     tokenize_character,
     tokenize_sentence,
